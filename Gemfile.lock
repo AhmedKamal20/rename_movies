@@ -1,0 +1,26 @@
+PATH
+  remote: .
+  specs:
+    rename_movies (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    json (2.1.0)
+    logger (1.2.8)
+    minitest (5.11.3)
+    rake (10.5.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.16)
+  json
+  logger
+  minitest (~> 5.0)
+  rake (~> 10.0)
+  rename_movies!
+
+BUNDLED WITH
+   1.16.1

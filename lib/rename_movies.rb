@@ -8,8 +8,9 @@ module RenameMovies
 
   @logger = Logger.new(STDOUT)
 
-  OMDB_KEY = nil
-  MOVIES_DIR = nil
+  OMDB_KEY = ENV['RENAME_MOVIES_OMDB_KEY']
+  MOVIES_DIR = ENV['RENAME_MOVIES_DIR']
+  VERBOSE = false
 
   RESOLUTIONS = %w[1080p 720p 480p 560p 4k uhd hd hq]
   STORAGE_FORMATS = %w[bluray brrip bdrip dvdrip dvdscr web-dl webrip hdrip hdtv]
@@ -38,14 +39,14 @@ module RenameMovies
     Regexp.new("\\s(#{CLEAN_KEYWORDS.join('|')}).*", 'i'),
   ]
 
-  def extract_year
+  def self.extract_year
     YEAR_MATCHERS.each do |format_regex|
       match = format_regex.match(@data[:original_name])
       @data[:year] = match[:year] if match
     end
   end
 
-  def extract_video_quality
+  def self.extract_video_quality
     VIDEO_QUALITY_MATCHERS.each do |format_regex|
       match = format_regex.match(@data[:original_name])
       @data[:encoding_standard] = match[:encoding_standard] if match && (match[:encoding_standard] rescue nil)
@@ -54,14 +55,14 @@ module RenameMovies
     end
   end
 
-  def extract_audio_quality
+  def self.extract_audio_quality
     AUDIO_QUALITY_MATCHERS.each do |format_regex|
       match = format_regex.match(@data[:original_name])
       @data[:audio_quality] = match[:audio_quality] if match
     end
   end
 
-  def extract_name
+  def self.extract_name
     @data[:new_name] = @data[:original_name]
     @data[:new_name] = @data[:new_name].gsub(/\W+/, ' ')
     CLEAN_NAME_MATCHERS.each do |format_regex|
@@ -70,7 +71,7 @@ module RenameMovies
     @data[:new_name] = @data[:new_name].split.join(" ")
   end
 
-  def get_movie_data
+  def self.get_movie_data
     if @data[:new_name] && @data[:year]
       url = "http://www.omdbapi.com/?t=#{@data[:new_name]}&y=#{@data[:year]}&apikey=#{OMDB_KEY}"
     elsif @data[:new_name]
@@ -92,14 +93,14 @@ module RenameMovies
     @data[:imdb_url] = "https://www.imdb.com/title/#{@data[:imdb_id]}/" if @data[:imdb_id]
   end
 
-  def save_movie_info
+  def self.save_movie_info
     file_name = MOVIES_DIR + @data[:original_name] + '/info.yml'
-    # @logger.info(@data.to_yaml)
+    @logger.info(@data.to_yaml) if VERBOSE
     @logger.info("Saving :: #{file_name}")
     File.write(file_name, @data.to_yaml)
   end
 
-  def rename_folder
+  def self.rename_folder
     if @data[:new_name] && !@data[:new_name].empty?
       new_file_name = []
       new_file_name << "[ #{@data[:year] || @data[:omdb_year]} ]" if @data[:year] || @data[:omdb_year]
